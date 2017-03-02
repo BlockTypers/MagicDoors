@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,10 +15,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.blocktyper.recipes.IRecipe;
+import com.blocktyper.v1_2_3.recipes.IRecipe;
+
 import static com.blocktyper.magicdoors.MagicDoorsPlugin.*;
 
-import net.md_5.bungee.api.ChatColor;
 
 public class MagicDoorsEquipCommand implements CommandExecutor {
 

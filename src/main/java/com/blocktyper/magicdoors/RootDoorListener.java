@@ -1,5 +1,12 @@
 package com.blocktyper.magicdoors;
 
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.keyChainRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.doorKeyRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.ownedRootDoorRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.rootDoorCopyRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.rootDoorRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.skeletonKeyRecipe;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,30 +27,19 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.blocktyper.helpers.InvisibleLoreHelper;
 import com.blocktyper.magicdoors.data.DimentionItemCount;
 import com.blocktyper.magicdoors.data.MagicDoor;
 import com.blocktyper.magicdoors.data.MagicDoorRepo;
-import com.blocktyper.nbt.NBTItem;
+import com.blocktyper.v1_2_3.helpers.InvisHelper;
+import com.blocktyper.v1_2_3.nbt.NBTItem;
 
-import static com.blocktyper.magicdoors.MagicDoorsPlugin.*;
-
-public class RootDoorListener implements Listener {
-
-	public static String DOOR_NAME_PREFIXES = "magic.doors.door.name.prefixes";
-	public static String DOOR_NAME_SUFFIXES = "magic.doors.door.name.suffixes";
-
-	public static final String DATA_KEY_MAGIC_DOOR_DIMENTION_MAP = "root-doors-dimention";
-	public static final String DATA_KEY_MAGIC_DOORS = "magic-doors";
-
-	public static final String PARENT_ID_HIDDEN_LORE_PREFIX = "#MAGIC_DOOR_PARENT";
+public class RootDoorListener extends ListenerBase {
 
 	private List<String> doorPrefixes;
 	private List<String> doorSuffixes;
@@ -53,9 +49,8 @@ public class RootDoorListener implements Listener {
 	private static MagicDoorRepo magicDoorRepo;
 	private static DimentionItemCount dimentionItemCount;
 
-
 	public RootDoorListener() {
-
+		super();
 		doorPrefixes = MagicDoorsPlugin.getPlugin().getConfig().getStringList(DOOR_NAME_PREFIXES);
 		doorSuffixes = MagicDoorsPlugin.getPlugin().getConfig().getStringList(DOOR_NAME_SUFFIXES);
 
@@ -128,13 +123,18 @@ public class RootDoorListener implements Listener {
 			if (nbtRecipeKey.startsWith(rootDoorCopyRecipe())) {
 				String parentId = null;
 
-				//MagicDoorsPlugin.getPlugin().getInvisibleLoreHelper()
+				// MagicDoorsPlugin.getPlugin().getInvisHelper()
 				List<String> lore = itemInHand.getItemMeta().getLore();
 				if (lore != null && !lore.isEmpty()) {
-					Optional<String> loreLineWithParentId = lore.stream().filter(l -> l != null && InvisibleLoreHelper.convertToVisibleString(l).contains(PARENT_ID_HIDDEN_LORE_PREFIX)).findFirst();
-					if(loreLineWithParentId != null && loreLineWithParentId.isPresent() && loreLineWithParentId.get() != null){
-						String loreLine = InvisibleLoreHelper.convertToVisibleString(loreLineWithParentId.get());
-						parentId = loreLine.substring(loreLine.indexOf(PARENT_ID_HIDDEN_LORE_PREFIX) + PARENT_ID_HIDDEN_LORE_PREFIX.length());
+					Optional<String> loreLineWithParentId = lore.stream()
+							.filter(l -> l != null
+									&& InvisHelper.convertToVisibleString(l).contains(PARENT_ID_HIDDEN_LORE_PREFIX))
+							.findFirst();
+					if (loreLineWithParentId != null && loreLineWithParentId.isPresent()
+							&& loreLineWithParentId.get() != null) {
+						String loreLine = InvisHelper.convertToVisibleString(loreLineWithParentId.get());
+						parentId = loreLine.substring(
+								loreLine.indexOf(PARENT_ID_HIDDEN_LORE_PREFIX) + PARENT_ID_HIDDEN_LORE_PREFIX.length());
 					}
 				}
 
@@ -177,43 +177,25 @@ public class RootDoorListener implements Listener {
 		}
 
 	}
-	
-	private String getParentIdFromLore(List<String> lore){
-		
-		String parentId = null;
-		if (lore != null && !lore.isEmpty()) {
-			Optional<String> loreLineWithParentId = lore.stream().filter(l -> l != null && InvisibleLoreHelper.convertToVisibleString(l).contains(PARENT_ID_HIDDEN_LORE_PREFIX)).findFirst();
-			if(loreLineWithParentId != null && loreLineWithParentId.isPresent() && loreLineWithParentId.get() != null){
-				String loreLine = InvisibleLoreHelper.convertToVisibleString(loreLineWithParentId.get());
-				parentId = loreLine.substring(loreLine.indexOf(PARENT_ID_HIDDEN_LORE_PREFIX) + PARENT_ID_HIDDEN_LORE_PREFIX.length());
-			}
-		}
-		
-		return parentId;
+
+	private void sendNamedKeyRequiredMessage(HumanEntity player, String doorId) {
+		player.sendMessage(ChatColor.RED + String.format(
+				MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-named-key-required", player), doorId));
 	}
-	
-	private void sendNamedKeyRequiredMessage(HumanEntity player, String doorId){
-		player
-		.sendMessage(
-				ChatColor.RED + String.format(
-						MagicDoorsPlugin.getPlugin().getLocalizedMessage(
-								"magic-doors-named-key-required", player),
-						doorId));
-	}
-	
-	private void sendMissingWorldMessage(HumanEntity player, String world){
-		player
-		.sendMessage(ChatColor.RED + new MessageFormat(MagicDoorsPlugin.getPlugin()
-				.getLocalizedMessage("magic-doors-failed-to-find-world", player))
+
+	private void sendMissingWorldMessage(HumanEntity player, String world) {
+		player.sendMessage(ChatColor.RED + new MessageFormat(
+				MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-failed-to-find-world", player))
 						.format(new Object[] { world }));
 	}
-	
-	
+
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void blockDamage(PlayerInteractEvent event) {
-		interactWithDoor(event, event.getPlayer(), MagicDoorsPlugin.getPlugin().getPlayerHelper().getItemInHand(event.getPlayer()), event.getClickedBlock());
+		interactWithDoor(event, event.getPlayer(),
+				MagicDoorsPlugin.getPlugin().getPlayerHelper().getItemInHand(event.getPlayer()),
+				event.getClickedBlock());
 	}
-	
+
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void blockDamage(BlockDamageEvent event) {
 		interactWithDoor(event, event.getPlayer(), event.getItemInHand(), event.getBlock());
@@ -225,7 +207,7 @@ public class RootDoorListener implements Listener {
 			MagicDoorsPlugin.getPlugin().debugInfo("Not holding an item");
 			return;
 		}
-		
+
 		if (block == null) {
 			MagicDoorsPlugin.getPlugin().debugInfo("Block was null");
 			return;
@@ -240,7 +222,7 @@ public class RootDoorListener implements Listener {
 		}
 
 		if (!nbtRecipeKey.equals(rootDoorCopyRecipe()) && !nbtRecipeKey.equals(doorKeyRecipe())
-				&& !nbtRecipeKey.equals(skeletonKeyRecipe())) {
+				&& !nbtRecipeKey.equals(skeletonKeyRecipe()) && !nbtRecipeKey.equals(keyChainRecipe())) {
 			String notHoldingMessage = "Not holding an item which has the recipe key: ";
 			MagicDoorsPlugin.getPlugin().debugInfo(notHoldingMessage + rootDoorCopyRecipe());
 			MagicDoorsPlugin.getPlugin().debugInfo(notHoldingMessage + doorKeyRecipe());
@@ -248,15 +230,11 @@ public class RootDoorListener implements Listener {
 			return;
 		}
 
+		boolean isKeyChain = nbtRecipeKey.equals(keyChainRecipe());
 		boolean isSkeletonKey = nbtRecipeKey.equals(skeletonKeyRecipe());
-		boolean isKey = isSkeletonKey || nbtRecipeKey.startsWith(doorKeyRecipe());
+		boolean isKey = isKeyChain || isSkeletonKey || nbtRecipeKey.startsWith(doorKeyRecipe());
 		boolean isPlainKey = nbtRecipeKey.equals(doorKeyRecipe());
 		boolean isRootDoorCopy = nbtRecipeKey.equals(rootDoorCopyRecipe());
-
-		if (!isRootDoorCopy && !isKey) {
-			MagicDoorsPlugin.getPlugin().debugInfo("Not a magic door related object in hand");
-			return;
-		}
 
 		initDimentionItemCount();
 
@@ -339,65 +317,68 @@ public class RootDoorListener implements Listener {
 
 		if (isRootDoorCopy && magicDoor.getParentId() == null) {
 			ItemMeta meta = itemInHand.getItemMeta();
-			
+
 			List<String> lore = meta.getLore();
-			
-			if(lore != null){
-				lore = lore.stream().filter(l -> l != null && !InvisibleLoreHelper.convertToVisibleString(l).contains(PARENT_ID_HIDDEN_LORE_PREFIX)).collect(Collectors.toList());
+
+			if (lore != null) {
+				lore = lore.stream().filter(
+						l -> l != null && !InvisHelper.convertToVisibleString(l).contains(PARENT_ID_HIDDEN_LORE_PREFIX))
+						.collect(Collectors.toList());
 			}
-			
-			if(lore == null){
+
+			if (lore == null) {
 				lore = new ArrayList<>();
 			}
-			
-			lore.add(InvisibleLoreHelper.convertToInvisibleString(PARENT_ID_HIDDEN_LORE_PREFIX) + magicDoor.getId());
+
+			lore.add(InvisHelper.convertToInvisibleString(PARENT_ID_HIDDEN_LORE_PREFIX) + magicDoor.getId());
 			meta.setLore(lore);
-			
+
 			itemInHand.setItemMeta(meta);
 			ItemStack rootDoorCopyItem = MagicDoorsPlugin.getPlugin().recipeRegistrar()
 					.getItemFromRecipe(rootDoorCopyRecipe(), player, null, 1);
 			String rootDoorCopyName = rootDoorCopyItem != null && rootDoorCopyItem.getItemMeta() != null
 					&& rootDoorCopyItem.getItemMeta().getDisplayName() != null
 							? rootDoorCopyItem.getItemMeta().getDisplayName() : "√RootDoorCopy";
-			player.sendMessage(ChatColor.GREEN + String.format(MagicDoorsPlugin.getPlugin()
-					.getLocalizedMessage("magic-doors-root-door-copy-imprinted", player), rootDoorCopyName));
+			player.sendMessage(ChatColor.GREEN + String.format(
+					MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-root-door-copy-imprinted", player),
+					rootDoorCopyName));
 			return;
 		}
 
 		if (magicDoor.getParentId() == null && isKey) {
-			
+
 			// the door owner is attempting to name some keys
 			if (isPlainKey && magicDoor.getOwnerName() != null) {
 				if (player.getName().equals(magicDoor.getOwnerName())) {
 					ItemMeta plainKeyMeta = itemInHand.getItemMeta();
-					
+
 					List<String> lore = plainKeyMeta.getLore();
-					if(lore == null){
+					if (lore == null) {
 						lore = new ArrayList<>();
 					}
-					
+
 					String parentId = getParentIdFromLore(lore);
-					
-					if(parentId == null){
-						lore.add(InvisibleLoreHelper.convertToInvisibleString(PARENT_ID_HIDDEN_LORE_PREFIX) + magicDoor.getId());
+
+					if (parentId == null) {
+						lore.add(
+								InvisHelper.convertToInvisibleString(PARENT_ID_HIDDEN_LORE_PREFIX) + magicDoor.getId());
 						plainKeyMeta.setLore(lore);
-						
+
 						itemInHand.setItemMeta(plainKeyMeta);
-						player.sendMessage(ChatColor.GREEN + String.format(MagicDoorsPlugin.getPlugin()
-								.getLocalizedMessage("magic-doors-key-imprinted", player), magicDoor.getId()));
+						player.sendMessage(ChatColor.GREEN + String.format(
+								MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-key-imprinted", player),
+								magicDoor.getId()));
 						return;
 					}
-					
+
 				}
 			}
 
 			if (magicDoor.getChildren() == null || magicDoor.getChildren().isEmpty()) {
 				// This is a magic door with no children
-				player.sendMessage(
-								ChatColor.RED + String.format(
-										MagicDoorsPlugin.getPlugin().getLocalizedMessage(
-												"magic-doors-root-has-no-children", player),
-										magicDoor.getId()));
+				player.sendMessage(ChatColor.RED + String.format(
+						MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-root-has-no-children", player),
+						magicDoor.getId()));
 				return;
 			}
 
@@ -405,17 +386,21 @@ public class RootDoorListener implements Listener {
 
 				if (isSkeletonKey && magicDoor.getOwnerName().equals(player.getName())) {
 					// this is the current player's door and they are using
-					// their skeleton key
-				} else {
-					
+					// their skeleton key or key chain
+				} else if(isKeyChain){
+					List<String> parentIds = getParentIdsOnKeyChain(itemInHand);
+					if(parentIds == null || !parentIds.contains(magicDoor.getId())){
+						sendNamedKeyRequiredMessage(player, magicDoor.getId());
+						return;
+					}
+				}else{
 					List<String> lore = itemInHand.getItemMeta().getLore();
-					if(lore == null){
+					if (lore == null) {
 						lore = new ArrayList<>();
 					}
-					
+
 					String parentId = getParentIdFromLore(lore);
-					
-					if(parentId == null || !parentId.equalsIgnoreCase(magicDoor.getId())){
+					if (parentId == null || !parentId.equalsIgnoreCase(magicDoor.getId())) {
 						sendNamedKeyRequiredMessage(player, magicDoor.getId());
 						return;
 					}
@@ -445,18 +430,20 @@ public class RootDoorListener implements Listener {
 			player.teleport(destination);
 
 			player.sendMessage(new MessageFormat(MagicDoorsPlugin.getPlugin()
-							.getLocalizedMessage("magic-doors-you-have-been-teleported-to-child", player))
-									.format(new Object[] { (childDoorNumber + 1) + "", magicDoor.getId() }));
+					.getLocalizedMessage("magic-doors-you-have-been-teleported-to-child", player))
+							.format(new Object[] { (childDoorNumber + 1) + "", magicDoor.getId() }));
 		} else if (magicDoor.getParentId() != null && isKey) {
 			// this is a child, teleport to parent
 
 			MagicDoor parentDoor = magicDoorRepo.getMap().get(magicDoor.getParentId());
 
 			if (parentDoor == null) {
-				player.sendMessage(ChatColor.RED + String.format(
-								MagicDoorsPlugin.getPlugin().getLocalizedMessage(
-										"magic-doors-failed-to-find-parent-door-id", player),
-								magicDoor.getParentId()));
+				player.sendMessage(
+						ChatColor.RED
+								+ String.format(
+										MagicDoorsPlugin.getPlugin().getLocalizedMessage(
+												"magic-doors-failed-to-find-parent-door-id", player),
+										magicDoor.getParentId()));
 				return;
 			}
 
@@ -464,10 +451,16 @@ public class RootDoorListener implements Listener {
 				if (isSkeletonKey && parentDoor.getOwnerName().equals(player.getName())) {
 					// this is the current player's door and they are using
 					// their skeleton key
-				} else {
+				} else if(isKeyChain) {
+					List<String> parentIds = getParentIdsOnKeyChain(itemInHand);
+					if(parentIds == null || !parentIds.contains(parentDoor.getId())){
+						sendNamedKeyRequiredMessage(player, parentDoor.getId());
+						return;
+					}
+				}else{
 					String parentId = getParentIdFromLore(itemInHand.getItemMeta().getLore());
-					
-					if(parentId == null || !parentId.equalsIgnoreCase(parentDoor.getId())){
+
+					if (parentId == null || !parentId.equalsIgnoreCase(parentDoor.getId())) {
 						sendNamedKeyRequiredMessage(player, parentDoor.getId());
 						return;
 					}
@@ -486,8 +479,8 @@ public class RootDoorListener implements Listener {
 			player.teleport(destination);
 
 			player.sendMessage(new MessageFormat(MagicDoorsPlugin.getPlugin()
-							.getLocalizedMessage("magic-doors-you-have-been-teleported-to-root", player))
-									.format(new Object[] { magicDoor.getParentId() }));
+					.getLocalizedMessage("magic-doors-you-have-been-teleported-to-root", player))
+							.format(new Object[] { magicDoor.getParentId() }));
 		}
 	}
 

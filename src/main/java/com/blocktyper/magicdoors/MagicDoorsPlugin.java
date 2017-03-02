@@ -3,9 +3,11 @@ package com.blocktyper.magicdoors;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.blocktyper.plugin.BlockTyperPlugin;
+import com.blocktyper.v1_2_3.BlockTyperBasePlugin;
+import com.blocktyper.v1_2_3.recipes.IRecipe;
 
-public class MagicDoorsPlugin extends BlockTyperPlugin {
+
+public class MagicDoorsPlugin extends BlockTyperBasePlugin {
 	
 	public static final String RECIPES_KEY = "MAGIC_DOORS_RECIPE_KEY";
 
@@ -16,6 +18,8 @@ public class MagicDoorsPlugin extends BlockTyperPlugin {
 	private static String RECIPE_NAME_ROOT_DOOR_COPY = "magic.doors.recipe.name.door.copy";
 	private static String RECIPE_NAME_DOOR_KEY = "magic.doors.recipe.name.door.key";
 	private static String RECIPE_NAME_SKELETON_KEY = "magic.doors.recipe.name.skeleton.key";
+	private static String RECIPE_NAME_KEY_CHAIN = "magic.doors.recipe.name.key.chain";
+	
 	
 	public static String rootDoorRecipe(){
 		return getPlugin().getConfig().getString(RECIPE_NAME_ROOT_DOOR);
@@ -31,6 +35,9 @@ public class MagicDoorsPlugin extends BlockTyperPlugin {
 	}
 	public static String skeletonKeyRecipe(){
 		return getPlugin().getConfig().getString(RECIPE_NAME_SKELETON_KEY);
+	}
+	public static String keyChainRecipe(){
+		return getPlugin().getConfig().getString(RECIPE_NAME_KEY_CHAIN);
 	}
 
 	private static MagicDoorsPlugin plugin;
@@ -60,5 +67,9 @@ public class MagicDoorsPlugin extends BlockTyperPlugin {
 	@Override
 	public String getRecipesNbtKey() {
 		return RECIPES_KEY;
+	}
+	@Override
+	public IRecipe bootstrapRecipe(IRecipe recipe) {
+		return recipe;
 	}
 }
