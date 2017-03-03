@@ -1,13 +1,23 @@
 package com.blocktyper.magicdoors;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
+import com.blocktyper.magicdoors.data.DimentionItemCount;
+import com.blocktyper.magicdoors.data.MagicDoor;
+import com.blocktyper.magicdoors.data.MagicDoorRepo;
 import com.blocktyper.v1_2_3.BlockTyperListener;
-import com.blocktyper.v1_2_3.IBlockTyperPlugin;
 import com.blocktyper.v1_2_3.helpers.InvisHelper;
 import com.blocktyper.v1_2_3.nbt.NBTItem;
 
@@ -21,12 +31,15 @@ public abstract class ListenerBase extends BlockTyperListener {
 
 	public static final String PARENT_ID_HIDDEN_LORE_PREFIX = "#MAGIC_DOOR_PARENT";
 
-	public ListenerBase(IBlockTyperPlugin plugin) {
-		init(plugin);
-	}
+	public static MagicDoorRepo magicDoorRepo;
+	public static DimentionItemCount dimentionItemCount;
+
 
 	public ListenerBase() {
 		init(MagicDoorsPlugin.getPlugin());
+
+		initMagicDoorRepo();
+		initDimentionItemCount();
 	}
 
 	protected String getParentIdFromLore(List<String> lore) {
@@ -81,6 +94,87 @@ public abstract class ListenerBase extends BlockTyperListener {
 		}
 
 		return keyChain.getParentIds();
+	}
+	
+	protected void initMagicDoorRepo() {
+		if (magicDoorRepo == null) {
+			magicDoorRepo = MagicDoorsPlugin.getPlugin().getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
+
+			if (magicDoorRepo == null || magicDoorRepo.getMap() == null) {
+				magicDoorRepo = new MagicDoorRepo();
+				magicDoorRepo.setMap(new HashMap<String, MagicDoor>());
+			}
+			updateMagicDoorRepo();
+		}
+	}
+
+	protected void updateMagicDoorRepo() {
+		MagicDoorsPlugin.getPlugin().setData(DATA_KEY_MAGIC_DOORS, magicDoorRepo, true);
+	}
+
+	protected void initDimentionItemCount() {
+		if (dimentionItemCount == null) {
+			dimentionItemCount = MagicDoorsPlugin.getPlugin().getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP,
+					DimentionItemCount.class);
+			if (dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null) {
+				dimentionItemCount = new DimentionItemCount();
+				dimentionItemCount.setItemsInDimentionAtValue(new HashMap<String, Map<Integer, Set<String>>>());
+			}
+			updateDimentionItemCount();
+		}
+	}
+	
+	protected void updateDimentionItemCount() {
+		MagicDoorsPlugin.getPlugin().setData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, dimentionItemCount, true);
+	}
+	
+	
+	protected void teleportToChildDoor(HumanEntity player, String parentId, int childDoorNumber) {
+
+		MagicDoor magicDoor = magicDoorRepo.getMap().get(parentId);
+		if (magicDoor == null) {
+			MagicDoorsPlugin.getPlugin().debugWarning("Failed to load parent door from magic-doors repo.");
+			return;
+		}
+
+		String childId = magicDoor.getChildren().get(childDoorNumber);
+		MagicDoor childDoor = magicDoorRepo.getMap().get(childId);
+
+		if (childDoor == null) {
+			player.sendMessage(ChatColor.RED + new MessageFormat(MagicDoorsPlugin.getPlugin()
+					.getLocalizedMessage("magic-doors-failed-to-find-child-door-number", player))
+							.format(new Object[] { (childDoorNumber + 1) + "", magicDoor.getChildren().size() + "" }));
+			return;
+		}
+
+		if(teleportToDoor(player, childDoor)){
+			player.sendMessage(new MessageFormat(MagicDoorsPlugin.getPlugin()
+					.getLocalizedMessage("magic-doors-you-have-been-teleported-to-child", player))
+							.format(new Object[] { (childDoorNumber + 1) + "", magicDoor.getId() }));
+		}
+	}
+	
+	
+	protected boolean teleportToDoor(HumanEntity player, MagicDoor door) {
+
+		World world = MagicDoorsPlugin.getPlugin().getServer().getWorld(door.getWorld());
+
+		if (world == null) {
+			sendMissingWorldMessage(player, door.getWorld());
+			return false;
+		}
+
+		Location destination = new Location(world, door.getPlayerX() + 0.0, door.getPlayerY() + 0.0,
+				door.getPlayerZ() + 0.0);
+		player.teleport(destination);
+		
+		return true;
+	}
+	
+	protected void sendMissingWorldMessage(HumanEntity player, String world) {
+		player.sendMessage(ChatColor.RED + new MessageFormat(
+				MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic-doors-failed-to-find-world", player))
+						.format(new Object[] { world }));
 	}
 
 }

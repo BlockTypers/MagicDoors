@@ -1,13 +1,18 @@
 package com.blocktyper.magicdoors;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 
+import com.blocktyper.magicdoors.data.MagicDoor;
+import com.blocktyper.v1_2_3.helpers.InvisHelper;
 import com.blocktyper.v1_2_3.nbt.NBTItem;
 
 public class KeyChainListener extends ListenerBase {
@@ -19,6 +24,14 @@ public class KeyChainListener extends ListenerBase {
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void onInventoryClick(InventoryClickEvent event) {
 		debugInfo("KeyChain");
+
+		if (event.getInventory().getName() != null && InvisHelper.convertToVisibleString(event.getInventory().getName())
+				.startsWith(PARENT_ID_HIDDEN_LORE_PREFIX)) {
+			event.setCancelled(true);
+			handleTeleportMenuClick(event.getWhoClicked(), event.getCurrentItem());
+			return;
+		}
+
 		if (event.getAction() != InventoryAction.SWAP_WITH_CURSOR) {
 			debugInfo("Not InventoryAction.SWAP_WITH_CURSOR");
 			return;
@@ -67,6 +80,23 @@ public class KeyChainListener extends ListenerBase {
 
 		event.getWhoClicked().setItemOnCursor(null);
 
+	}
+
+	private void handleTeleportMenuClick(HumanEntity player, ItemStack item) {
+		NBTItem nbtItem = new NBTItem(item);
+		String id = nbtItem.getString("id");
+		String parentName = nbtItem.getString("parentName");
+		int doorNumber = nbtItem.getInteger("doorNumber");
+		
+		if(magicDoorRepo.getMap().containsKey(id)){
+			MagicDoor magicDoor = magicDoorRepo.getMap().get(id);
+			
+			if(teleportToDoor(player, magicDoor)){
+				player.sendMessage(new MessageFormat(MagicDoorsPlugin.getPlugin()
+						.getLocalizedMessage("magic-doors-you-have-been-teleported-to-child", player))
+								.format(new Object[] { (doorNumber) + "", parentName }));
+			}
+		}
 	}
 
 }
