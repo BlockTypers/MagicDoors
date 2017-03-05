@@ -188,9 +188,9 @@ recipe.key-chain.locales:
   - de
   - es
   - fr
-recipe.key-chain.de.name: Key Chain
-recipe.key-chain.es.name: Key Chain
-recipe.key-chain.fr.name: Key Chain
+recipe.key-chain.de.name: Schlüsselanhänger
+recipe.key-chain.es.name: llavero
+recipe.key-chain.fr.name: Porte-clés
 recipe.key-chain.rows: 
   - ABA
   - ASA
@@ -202,7 +202,7 @@ recipe.key-chain.mats:
   - M=EMPTY_MAP
 recipe.key-chain.item-has-nbt-key: 
   - 1=skeleton-key
-recipe.key-chain.output: BOOK
+recipe.key-chain.output: TRIPWIRE_HOOK
 recipe.key-chain.listeners: 
   - com.blocktyper.magicdoors.KeyChainListener
   
