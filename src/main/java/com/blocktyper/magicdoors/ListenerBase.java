@@ -17,9 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import com.blocktyper.magicdoors.data.DimentionItemCount;
 import com.blocktyper.magicdoors.data.MagicDoor;
 import com.blocktyper.magicdoors.data.MagicDoorRepo;
-import com.blocktyper.v1_2_5.BlockTyperListener;
-import com.blocktyper.v1_2_5.helpers.InvisHelper;
-import com.blocktyper.v1_2_5.nbt.NBTItem;
+import com.blocktyper.v1_2_6.BlockTyperListener;
+import com.blocktyper.v1_2_6.helpers.InvisHelper;
+import com.blocktyper.v1_2_6.nbt.NBTItem;
 
 public abstract class ListenerBase extends BlockTyperListener {
 

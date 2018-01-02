@@ -3,8 +3,8 @@ package com.blocktyper.magicdoors;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.blocktyper.v1_2_5.BlockTyperBasePlugin;
-import com.blocktyper.v1_2_5.recipes.IRecipe;
+import com.blocktyper.v1_2_6.BlockTyperBasePlugin;
+import com.blocktyper.v1_2_6.recipes.IRecipe;
 
 
 public class MagicDoorsPlugin extends BlockTyperBasePlugin {
