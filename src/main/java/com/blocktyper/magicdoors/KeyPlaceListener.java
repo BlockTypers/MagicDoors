@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.blocktyper.v1_2_3.nbt.NBTItem;
+import com.blocktyper.v1_2_5.nbt.NBTItem;
 
 
 public class KeyPlaceListener implements Listener {
@@ -21,7 +21,7 @@ public class KeyPlaceListener implements Listener {
 				MagicDoorsPlugin.getPlugin().debugInfo("Not holding an item");
 				return;
 			}
-			NBTItem nbtItem = new com.blocktyper.v1_2_3.nbt.NBTItem(itemInHand);
+			NBTItem nbtItem = new com.blocktyper.v1_2_5.nbt.NBTItem(itemInHand);
 			String nbtRecipeKey = nbtItem.getString(MagicDoorsPlugin.RECIPES_KEY);
 			if (nbtRecipeKey == null || !nbtRecipeKey.equals(MagicDoorsPlugin.doorKeyRecipe())) {
 				MagicDoorsPlugin.getPlugin().debugInfo("Not holding magic door key.'");

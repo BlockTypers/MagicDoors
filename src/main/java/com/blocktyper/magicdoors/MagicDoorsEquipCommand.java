@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.blocktyper.v1_2_3.recipes.IRecipe;
+import com.blocktyper.v1_2_5.recipes.IRecipe;
 
 import static com.blocktyper.magicdoors.MagicDoorsPlugin.*;
 

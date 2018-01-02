@@ -12,8 +12,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.blocktyper.magicdoors.data.MagicDoor;
-import com.blocktyper.v1_2_3.helpers.InvisHelper;
-import com.blocktyper.v1_2_3.nbt.NBTItem;
+import com.blocktyper.v1_2_5.helpers.InvisHelper;
+import com.blocktyper.v1_2_5.nbt.NBTItem;
 
 public class KeyChainListener extends ListenerBase {
 

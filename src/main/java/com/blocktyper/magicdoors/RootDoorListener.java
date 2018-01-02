@@ -36,8 +36,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.blocktyper.magicdoors.data.MagicDoor;
 import com.blocktyper.magicdoors.data.MagicDoorRepo;
-import com.blocktyper.v1_2_3.helpers.InvisHelper;
-import com.blocktyper.v1_2_3.nbt.NBTItem;
+import com.blocktyper.v1_2_5.helpers.InvisHelper;
+import com.blocktyper.v1_2_5.nbt.NBTItem;
 
 public class RootDoorListener extends ListenerBase {
 
